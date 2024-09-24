@@ -13,15 +13,29 @@ use frcrs::sleep_hz;
 use frcrs::Subsystem;
 
 pub struct Ferris {
-    
+    drivetrain: Subsystem<drivetrain>,
+    shooter: Subsystem<shooter>
 }
 
 pub struct Controllers {
-    
+    left_drive: Joystick,
+    right_drive: Joystick,
+    operator: Joystick
 }
 
 pub async fn configure(executor: &LocalSet) {
-    
+    let ferris = Ferris 
+    {
+        drivetrain: Subsystem::new(Drivetrain::new()),
+        shooter: Subsystem::new(Shooter::new()),
+    };
+
+    let mut controllers = Controllers 
+    {
+        left_drive: Joystick::new(constants::input::LEFT),
+        right_drive: Joystick::new(constants::input::RIGHT),
+        operator: Joystick::new(constants::input::OPERATOR),
+    };
 
     container!(container, executor, &ferris, &mut controllers);
 }
