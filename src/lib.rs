@@ -42,4 +42,31 @@ pub async fn configure(executor: &LocalSet) {
 
 pub async fn container<'a>(executor: &'a LocalSet, ferris: &Ferris, controllers: &mut Controllers) {
     
+    ferris.drivetrain.with_borrow_mut(|drivetrain| {
+        drivetrain.drive(controllers.left_drive.get_y(), controllers.right_drive.get_y());
+    });
+
+    ferris.shooter.with_borrow_mut(|shooter| {
+        if controllers.operator.get(2) {
+            shooter.set_shooter(1. - (controllers.operator.get_throttle() + 1.) / 2.);
+        } else {
+            shooter.set_shooter(0.);
+        }
+
+        if controllers.operator.get(3) {
+            shooter.set_angle(0.75);
+        } else if controllers.operator.get(4) {
+            shooter.set_angle(-0.75);
+        } else {
+            shooter.set_angle(0.);
+        }
+    });
+
+    if controllers.operator.get(1) {
+        executor.spawn_local(async move {
+            ferris.shooter.clone().with_borrow_mut_async(|shooter| async {
+                shooter.shoot().await;
+            }).await; // Might break?
+        });
+    }
 }
